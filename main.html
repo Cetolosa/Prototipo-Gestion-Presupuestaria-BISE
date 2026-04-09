@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Control Presupuestario — BISE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:    #0B1829;
+  --blue:    #2563EB;
+  --blue-lt: #EFF6FF;
+  --green:   #059669;
+  --green-lt:#ECFDF5;
+  --amber:   #D97706;
+  --amber-lt:#FFFBEB;
+  --red:     #DC2626;
+  --red-lt:  #FEF2F2;
+  --gray:    #64748B;
+  --border:  #E2E8F0;
+  --bg:      #F1F5F9;
+  --white:   #FFFFFF;
+  --text:    #0F172A;
+  --text2:   #475569;
+  --mono:    'DM Mono', monospace;
+  --sans:    'Plus Jakarta Sans', sans-serif;
+  --radius:  12px;
+  --shadow:  0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+}
+
+body { font-family: var(--sans); font-size: 14px; color: var(--text); background: var(--bg); min-height: 100vh; }
+
+/* ══ LOGIN ══ */
+#login-screen {
+  position: fixed; inset: 0; background: var(--navy);
+  display: flex; align-items: center; justify-content: center; z-index: 9999;
+  background-image: radial-gradient(ellipse at 70% 20%, rgba(37,99,235,.18) 0%, transparent 60%),
+                    radial-gradient(ellipse at 10% 80%, rgba(37,99,235,.1) 0%, transparent 50%);
+}
+.login-box {
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);
+  border-radius: 20px; padding: 44px 44px 40px; width: 100%; max-width: 420px;
+  backdrop-filter: blur(20px);
+}
+.login-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 36px; }
+.login-logo-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: linear-gradient(135deg, #2563EB, #1d4ed8);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.login-logo-name { font-size: 16px; font-weight: 700; color: #fff; }
+.login-logo-sub  { font-size: 12px; color: rgba(255,255,255,.4); margin-top: 2px; }
+.login-title    { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+.login-subtitle { font-size: 13px; color: rgba(255,255,255,.45); margin-bottom: 28px; line-height: 1.5; }
+.login-field { margin-bottom: 16px; }
+.login-field label { display: block; font-size: 12px; font-weight: 600; color: rgba(255,255,255,.5); margin-bottom: 7px; letter-spacing: .04em; text-transform: uppercase; }
+.login-field input {
+  width: 100%; font-size: 14px; padding: 11px 14px;
+  border: 1px solid rgba(255,255,255,.12); border-radius: 10px;
+  background: rgba(255,255,255,.06); color: #fff; outline: none;
+  font-family: var(--sans); transition: border-color .15s, background .15s;
+}
+.login-field input::placeholder { color: rgba(255,255,255,.25); }
+.login-field input:focus { border-color: rgba(37,99,235,.7); background: rgba(255,255,255,.09); }
+.login-btn {
+  width: 100%; padding: 12px; background: var(--blue); color: #fff;
+  border: none; border-radius: 10px; font-size: 14px; font-weight: 700;
+  cursor: pointer; margin-top: 10px; font-family: var(--sans);
+  transition: background .15s, transform .1s; letter-spacing: .02em;
+}
+.login-btn:hover { background: #1d4ed8; transform: translateY(-1px); }
+.login-btn:active { transform: translateY(0); }
+.login-btn:disabled { background: rgba(37,99,235,.4); cursor: not-allowed; transform: none; }
+.login-error {
+  background: rgba(220,38,38,.15); color: #FCA5A5; border: 1px solid rgba(220,38,38,.3);
+  font-size: 12px; padding: 9px 13px; border-radius: 8px; margin-bottom: 16px; display: none;
+}
+.login-hint { font-size: 11px; color: rgba(255,255,255,.22); text-align: center; margin-top: 20px; line-height: 1.6; }
+.login-hint strong { color: rgba(255,255,255,.4); }
+.login-divider { display: flex; align-items: center; gap: 10px; margin: 18px 0; }
+.login-divider::before, .login-divider::after { content:''; flex:1; height:1px; background:rgba(255,255,255,.08); }
+.login-divider span { font-size: 11px; color: rgba(255,255,255,.25); }
+.login-sso {
+  width: 100%; padding: 10px; background: transparent; color: rgba(255,255,255,.55);
+  border: 1px solid rgba(255,255,255,.12); border-radius: 10px; font-size: 13px;
+  font-weight: 600; cursor: pointer; font-family: var(--sans);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: background .15s, color .15s;
+}
+.login-sso:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.8); }
+
+/* ══ APP SHELL ══ */
+.shell { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 262px; min-width: 262px; background: var(--navy);
+  display: flex; flex-direction: column;
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+}
+.main { flex: 1; overflow: auto; }
+
+.sb-header { padding: 26px 20px 18px; border-bottom: 1px solid rgba(255,255,255,.07); }
+.sb-logo { display: flex; align-items: center; gap: 11px; }
+.sb-logo-icon {
+  width: 36px; height: 36px; border-radius: 9px;
+  background: linear-gradient(135deg, #2563EB, #1d4ed8);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.sb-logo-name { font-size: 14px; font-weight: 700; color: #fff; line-height: 1.2; }
+.sb-logo-sub  { font-size: 11px; color: rgba(255,255,255,.38); margin-top: 2px; }
+.sb-meta { padding: 13px 20px; border-bottom: 1px solid rgba(255,255,255,.07); }
+.sb-meta-row { font-size: 10px; color: rgba(255,255,255,.35); margin-bottom: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+.sb-meta-val  { font-size: 12px; color: rgba(255,255,255,.65); font-weight: 500; }
+.sb-nav { flex: 1; padding: 12px 10px; }
+.sb-section { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.25); padding: 12px 12px 5px; }
+.sb-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 12px; border-radius: 8px; cursor: pointer;
+  font-size: 13px; font-weight: 500; color: rgba(255,255,255,.52);
+  transition: background .12s, color .12s; user-select: none; margin-bottom: 1px;
+}
+.sb-item:hover  { background: rgba(255,255,255,.07); color: rgba(255,255,255,.85); }
+.sb-item.active { background: rgba(37,99,235,.3); color: #fff; }
+.sb-item svg { flex-shrink: 0; }
+.sb-badge { margin-left: auto; font-size: 10px; font-weight: 700; background: var(--red); color: #fff; padding: 1px 6px; border-radius: 20px; }
+.sb-badge.amber { background: var(--amber); }
+.sb-badge.green { background: var(--green); }
+.sb-user { padding: 12px 16px; border-top: 1px solid rgba(255,255,255,.07); display: flex; align-items: center; gap: 10px; }
+.sb-avatar { width: 32px; height: 32px; border-radius: 50%; background: rgba(37,99,235,.4); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.sb-user-name { font-size: 12px; font-weight: 600; color: rgba(255,255,255,.8); }
+.sb-user-role { font-size: 11px; color: rgba(255,255,255,.35); }
+.sb-logout { margin-left: auto; cursor: pointer; color: rgba(255,255,255,.3); font-size: 11px; transition: color .12s; }
+.sb-logout:hover { color: rgba(255,255,255,.6); }
+
+/* ══ Pages ══ */
+.page-wrap { display: none; }
+.page-wrap.active { display: block; }
+
+.topbar {
+  background: var(--white); border-bottom: 1px solid var(--border);
+  padding: 16px 28px; display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 10; gap: 12px;
+}
+.topbar-left h1 { font-size: 17px; font-weight: 700; }
+.topbar-left p  { font-size: 12px; color: var(--gray); margin-top: 1px; }
+.topbar-actions { display: flex; gap: 8px; }
+.content { padding: 24px 28px; }
+
+/* ══ Buttons ══ */
+.btn { padding: 7px 15px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--white); color: var(--text2); font-family: var(--sans); transition: all .12s; }
+.btn:hover { background: var(--bg); }
+.btn-primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+.btn-primary:hover { background: #1d4ed8; border-color: #1d4ed8; }
+.btn-green { background: var(--green); color: #fff; border-color: var(--green); }
+.btn-green:hover { background: #047857; }
+
+/* ══ KPIs ══ */
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px,1fr)); gap: 12px; margin-bottom: 20px; }
+.kpi { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow); }
+.kpi-label { font-size: 11px; font-weight: 600; color: var(--gray); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 7px; }
+.kpi-val   { font-size: 24px; font-weight: 800; color: var(--text); font-family: var(--mono); line-height: 1; }
+.kpi-val.blue  { color: var(--blue); }
+.kpi-val.green { color: var(--green); }
+.kpi-val.amber { color: var(--amber); }
+.kpi-val.red   { color: var(--red); }
+.kpi-sub  { font-size: 11px; color: var(--gray); margin-top: 5px; }
+.kpi-trend { font-size: 11px; margin-top: 5px; font-weight: 600; }
+.kpi-trend.up   { color: var(--green); }
+.kpi-trend.down { color: var(--red); }
+
+/* ══ Cards ══ */
+.card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow); margin-bottom: 16px; }
+.card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 10px; }
+.card-title { font-size: 14px; font-weight: 700; }
+.card-sub   { font-size: 12px; color: var(--gray); margin-top: 2px; }
+
+/* ══ Tables ══ */
+.tbl-wrap { overflow-x: auto; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tbl th { text-align: left; padding: 8px 11px; font-size: 11px; font-weight: 600; color: var(--gray); border-bottom: 2px solid var(--border); white-space: nowrap; background: #FAFAFA; }
+.tbl td { padding: 9px 11px; border-bottom: 1px solid var(--border); color: var(--text); white-space: nowrap; }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tr:hover td { background: #F8FAFC; }
+.tbl .mono { font-family: var(--mono); font-size: 12px; }
+.tbl .bold { font-weight: 700; }
+.tbl .total td { background: #F1F5F9; font-weight: 700; border-top: 2px solid var(--border); }
+
+/* ══ Badges ══ */
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.b-green { background: var(--green-lt); color: var(--green); }
+.b-amber { background: var(--amber-lt); color: var(--amber); }
+.b-red   { background: var(--red-lt);   color: var(--red); }
+.b-blue  { background: var(--blue-lt);  color: var(--blue); }
+.b-gray  { background: #F1F5F9;         color: var(--gray); }
+
+/* ══ Alert banners ══ */
+.alert-banner { display: flex; align-items: flex-start; gap: 12px; padding: 13px 16px; border-radius: var(--radius); margin-bottom: 16px; border-left: 4px solid; }
+.alert-banner.red   { background: var(--red-lt);   border-color: var(--red); }
+.alert-banner.amber { background: var(--amber-lt); border-color: var(--amber); }
+.alert-banner.green { background: var(--green-lt); border-color: var(--green); }
+.alert-banner-title { font-size: 13px; font-weight: 700; }
+.alert-banner-sub   { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+/* ══ Budget bars ══ */
+.budget-bar-track { height: 8px; background: var(--bg); border-radius: 4px; overflow: visible; position: relative; }
+.budget-bar-fill  { height: 100%; border-radius: 4px; }
+.budget-bar-committed { height: 100%; border-radius: 4px; position: absolute; top: 0; opacity: .5; }
+.budget-bar-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--gray); margin-top: 4px; }
+
+/* ══ Process flow ══ */
+.process-flow { display: grid; grid-template-columns: 1fr 28px 1fr 28px 1fr; align-items: start; margin-bottom: 24px; }
+.process-step { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 18px; box-shadow: var(--shadow); }
+.process-step-num { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; font-size: 12px; font-weight: 800; margin-bottom: 10px; }
+.ps-1 .process-step-num { background: var(--blue-lt); color: var(--blue); }
+.ps-2 .process-step-num { background: var(--amber-lt); color: var(--amber); }
+.ps-3 .process-step-num { background: var(--green-lt); color: var(--green); }
+.process-step-title { font-size: 13px; font-weight: 700; margin-bottom: 5px; }
+.process-step-desc  { font-size: 12px; color: var(--gray); line-height: 1.5; margin-bottom: 12px; }
+.process-activities { list-style: none; }
+.process-activities li { display: flex; gap: 8px; align-items: flex-start; font-size: 12px; color: var(--text2); padding: 4px 0; border-bottom: 1px solid var(--border); }
+.process-activities li:last-child { border: none; }
+.process-activities .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.ps-1 .dot { background: var(--blue); } .ps-2 .dot { background: var(--amber); } .ps-3 .dot { background: var(--green); }
+.process-arrow { display: flex; align-items: center; justify-content: center; padding-top: 44px; color: #CBD5E1; }
+
+/* ══ Contract cards ══ */
+.contract-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow); margin-bottom: 16px; }
+.contract-card.alert { border-color: #FECACA; }
+.contract-card-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+.contract-id   { font-size: 11px; font-weight: 700; color: var(--blue); font-family: var(--mono); }
+.contract-name { font-size: 14px; font-weight: 700; margin-top: 2px; }
+.contract-meta { font-size: 11px; color: var(--gray); margin-top: 3px; }
+.contract-numbers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.cn-label { font-size: 10px; font-weight: 600; color: var(--gray); text-transform: uppercase; letter-spacing: .05em; }
+.cn-val   { font-size: 15px; font-weight: 700; font-family: var(--mono); margin-top: 2px; }
+
+/* ══ Grid ══ */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media(max-width:800px){ .grid2 { grid-template-columns: 1fr; } }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+@media(max-width:900px){ .grid3 { grid-template-columns: 1fr; } }
+
+/* ══ Timeline / Trazabilidad ══ */
+.timeline { display: flex; flex-direction: column; gap: 0; }
+.tl-item { display: flex; gap: 14px; position: relative; padding-bottom: 20px; }
+.tl-item:last-child { padding-bottom: 0; }
+.tl-item:last-child .tl-line { display: none; }
+.tl-left { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 32px; }
+.tl-dot  { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 13px; border: 2px solid; }
+.tl-dot.red    { background: var(--red-lt);   border-color: var(--red);   color: var(--red); }
+.tl-dot.amber  { background: var(--amber-lt); border-color: var(--amber); color: var(--amber); }
+.tl-dot.green  { background: var(--green-lt); border-color: var(--green); color: var(--green); }
+.tl-dot.blue   { background: var(--blue-lt);  border-color: var(--blue);  color: var(--blue); }
+.tl-dot.gray   { background: #F1F5F9;         border-color: var(--border);color: var(--gray); }
+.tl-line { flex: 1; width: 2px; background: var(--border); margin-top: 4px; }
+.tl-body { flex: 1; padding-top: 5px; }
+.tl-title { font-size: 13px; font-weight: 600; }
+.tl-sub   { font-size: 12px; color: var(--gray); margin-top: 3px; line-height: 1.45; }
+.tl-time  { font-size: 11px; color: var(--gray); font-family: var(--mono); margin-top: 4px; }
+.tl-tag   { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; margin-top: 6px; }
+
+/* ══ Alert stats donut area ══ */
+.donut-wrap { display: flex; align-items: center; gap: 24px; }
+.donut-svg  { flex-shrink: 0; }
+.donut-legend { display: flex; flex-direction: column; gap: 8px; }
+.donut-legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.donut-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.donut-legend-val { font-family: var(--mono); font-weight: 700; font-size: 13px; margin-left: auto; padding-left: 16px; }
+
+/* ══ EMAIL VIEWER ══ */
+.email-panel { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); margin-bottom: 16px; }
+.email-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); }
+.email-subject { font-size: 16px; font-weight: 700; margin-bottom: 14px; }
+.email-meta-row { display: flex; gap: 8px; align-items: center; font-size: 13px; margin-bottom: 6px; }
+.email-meta-label { font-size: 11px; font-weight: 600; color: var(--gray); min-width: 52px; text-transform: uppercase; letter-spacing: .04em; }
+.email-meta-val { color: var(--text); }
+.email-meta-val a { color: var(--blue); text-decoration: none; }
+.email-badges { display: flex; gap: 6px; margin-top: 12px; }
+.email-body { padding: 24px; line-height: 1.7; font-size: 13.5px; color: var(--text2); border-bottom: 1px solid var(--border); }
+.email-body h3 { font-size: 14px; color: var(--text); margin: 18px 0 8px; }
+.email-body h3:first-child { margin-top: 0; }
+.email-body p { margin-bottom: 10px; }
+.email-body table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+.email-body table th { background: #F8FAFC; padding: 8px 12px; text-align: left; font-size: 11px; font-weight: 600; color: var(--gray); border-bottom: 2px solid var(--border); }
+.email-body table td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text); }
+.email-body .highlight-box { background: var(--red-lt); border: 1px solid #FECACA; border-radius: 8px; padding: 14px 16px; margin: 12px 0; }
+.email-body .highlight-box.green { background: var(--green-lt); border-color: #A7F3D0; }
+.email-body .sig { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 12px; color: var(--gray); }
+.email-actions { padding: 14px 24px; background: #FAFAFA; display: flex; gap: 8px; align-items: center; }
+
+/* Email thread replies */
+.email-thread { }
+.thread-reply { border-top: 2px solid var(--border); }
+.thread-reply-header { padding: 14px 24px; display: flex; align-items: center; gap: 12px; cursor: pointer; background: #FAFAFA; user-select: none; }
+.thread-reply-header:hover { background: #F1F5F9; }
+.thread-reply-avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+.thread-reply-meta { flex: 1; }
+.thread-reply-from { font-size: 13px; font-weight: 600; }
+.thread-reply-preview { font-size: 12px; color: var(--gray); margin-top: 1px; }
+.thread-reply-time { font-size: 11px; color: var(--gray); font-family: var(--mono); }
+.thread-reply-body { padding: 20px 24px; font-size: 13px; line-height: 1.7; color: var(--text2); display: none; border-top: 1px solid var(--border); }
+.thread-reply-body.open { display: block; }
+
+/* ══ Alert history table ══ */
+.alert-week-bar { display: flex; gap: 2px; height: 40px; align-items: flex-end; margin: 8px 0; }
+.awb-col { display: flex; flex-direction: column; gap: 2px; align-items: center; flex: 1; }
+.awb-bar { width: 100%; border-radius: 3px 3px 0 0; }
+.awb-label { font-size: 9px; color: var(--gray); margin-top: 3px; font-family: var(--mono); }
+
+/* ══ Animations ══ */
+@keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+.page-wrap.active .kpi { animation: fadeUp .25s ease both; }
+.page-wrap.active .kpi:nth-child(2) { animation-delay: .04s; }
+.page-wrap.active .kpi:nth-child(3) { animation-delay: .08s; }
+.page-wrap.active .kpi:nth-child(4) { animation-delay: .12s; }
+.page-wrap.active .kpi:nth-child(5) { animation-delay: .16s; }
+.page-wrap.active .kpi:nth-child(6) { animation-delay: .20s; }
+.page-wrap.active .kpi:nth-child(7) { animation-delay: .24s; }
+.page-wrap.active .kpi:nth-child(8) { animation-delay: .28s; }
+
+@media(max-width:768px) {
+  .sidebar { display: none; }
+  .content { padding: 16px; }
+  .topbar  { padding: 14px 16px; }
+  .process-flow { grid-template-columns: 1fr; }
+  .process-arrow { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════ LOGIN ══════════════════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-icon">
+        <svg width="20" height="20" viewBox="0 0 18 18" fill="none">
+          <path d="M3 9L7 5L11 9L15 5" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M3 13L7 9L11 13L15 9" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity=".5"/>
+        </svg>
+      </div>
+      <div>
+        <div class="login-logo-name">Control Presupuestario BISE</div>
+        <div class="login-logo-sub">Sistema de Gestión de Pedidos</div>
+      </div>
+    </div>
+
+    <div class="login-title">Bienvenido</div>
+    <div class="login-subtitle">Ingresa con tus credenciales corporativas para acceder a la plataforma.</div>
+
+    <div class="login-error" id="login-error">Usuario o contraseña incorrectos.</div>
+
+    <div class="login-field">
+      <label>Usuario</label>
+      <input type="text" id="login-user" placeholder="usuario@empresa.cl" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-field">
+      <label>Contraseña</label>
+      <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+
+    <button class="login-btn" id="login-btn" onclick="doLogin()">Ingresar al sistema</button>
+
+    <div class="login-divider"><span>o accede con</span></div>
+    <button class="login-sso" onclick="doSSOLogin()">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="7.5" cy="5" r="2.5"/><path d="M2.5 13c0-2.8 2.2-5 5-5s5 2.2 5 5"/></svg>
+      SSO Corporativo — Ping Federate
+    </button>
+
+    <div class="login-hint">
+      Demo: <strong>admin@empresa.cl</strong> · contraseña <strong>bise2025</strong>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════ APP ══════════════════════════ -->
+<div class="shell" id="app-shell" style="display:none">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sb-header">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M3 9L7 5L11 9L15 5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M3 13L7 9L11 13L15 9" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".5"/>
+        </svg>
+      </div>
+      <div>
+        <div class="sb-logo-name">Control BISE</div>
+        <div class="sb-logo-sub">Gestión Presupuestaria</div>
+      </div>
+    </div>
+  </div>
+  <div class="sb-meta">
+    <div class="sb-meta-row">Período</div>
+    <div class="sb-meta-val">Enero — Mayo 2025</div>
+    <div style="margin-top:8px" class="sb-meta-row">Emisión</div>
+    <div class="sb-meta-val">9 de abril de 2025</div>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-section">Principal</div>
+    <div class="sb-item active" onclick="showPage('resumen',this)">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor"><rect x="1" y="1" width="5.5" height="5.5" rx="1"/><rect x="8.5" y="1" width="5.5" height="5.5" rx="1" opacity=".4"/><rect x="1" y="8.5" width="5.5" height="5.5" rx="1" opacity=".4"/><rect x="8.5" y="8.5" width="5.5" height="5.5" rx="1"/></svg>
+      Resumen ejecutivo
+    </div>
+    <div class="sb-item" onclick="showPage('trazabilidad',this)">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="3" cy="3" r="1.5"/><circle cx="3" cy="7.5" r="1.5"/><circle cx="3" cy="12" r="1.5"/><line x1="4.5" y1="3" x2="12" y2="3"/><line x1="4.5" y1="7.5" x2="12" y2="7.5"/><line x1="4.5" y1="12" x2="9" y2="12"/></svg>
+      Trazabilidad
+      <span class="sb-badge amber">28</span>
+    </div>
+    <div class="sb-item" onclick="showPage('alertas',this)">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M7.5 1.5v1M7.5 1.5a5 5 0 015 5v3l1 2H1.5l1-2v-3a5 5 0 015-5z"/><path d="M6 12.5a1.5 1.5 0 003 0"/></svg>
+      Alertas semanales
+      <span class="sb-badge">3</span>
+    </div>
+    <div class="sb-section">Módulos</div>
+    <div class="sb-item" onclick="showPage('modelo',this)">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="2.5" cy="7.5" r="1.5"/><circle cx="7.5" cy="2.5" r="1.5"/><circle cx="12.5" cy="7.5" r="1.5"/><line x1="4" y1="7.5" x2="11" y2="7.5"/><line x1="7.5" y1="4" x2="7.5" y2="11"/><circle cx="7.5" cy="12.5" r="1.5"/></svg>
+      Modelo de procesos
+    </div>
+    <div class="sb-item" onclick="showPage('datos',this)">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4"><ellipse cx="7.5" cy="4" rx="5.5" ry="2"/><path d="M2 4v3.5c0 1.1 2.46 2 5.5 2s5.5-.9 5.5-2V4"/><path d="M2 7.5V11c0 1.1 2.46 2 5.5 2s5.5-.9 5.5-2V7.5"/></svg>
+      Datos maestros
+    </div>
+    <div class="sb-item" onclick="showPage('control',this)">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 11L5.5 7.5L8.5 10L13 4"/><polyline points="10,4 13,4 13,7"/></svg>
+      Control presupuestario
+      <span class="sb-badge amber">3</span>
+    </div>
+    <div class="sb-item" onclick="showPage('ejecucion',this)">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="2" width="11" height="11" rx="1.5"/><line x1="5" y1="7.5" x2="10" y2="7.5"/><line x1="7.5" y1="5" x2="7.5" y2="10"/></svg>
+      Ejecución presupuestaria
+    </div>
+    <div class="sb-item" onclick="showPage('contratos',this)">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="1.5" width="9" height="12" rx="1.2"/><line x1="5.5" y1="5" x2="9.5" y2="5"/><line x1="5.5" y1="7.5" x2="9.5" y2="7.5"/><line x1="5.5" y1="10" x2="7.5" y2="10"/></svg>
+      Detalle por contrato
+    </div>
+    <div class="sb-section">Comunicaciones</div>
+    <div class="sb-item" onclick="showPage('correo',this)">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1.5" y="3" width="12" height="9" rx="1.2"/><polyline points="1.5,3 7.5,8.5 13.5,3"/></svg>
+      Correo de alerta
+      <span class="sb-badge green">✓</span>
+    </div>
+  </div>
+  <div class="sb-user">
+    <div class="sb-avatar" id="sb-avatar">JM</div>
+    <div>
+      <div class="sb-user-name" id="sb-name">Jaime Bulo</div>
+      <div class="sb-user-role" id="sb-role">Administrador</div>
+    </div>
+    <div class="sb-logout" onclick="doLogout()" title="Cerrar sesión">⎋</div>
+  </div>
+</div>
+
+<!-- ══════════ MAIN ══════════ -->
+<div class="main">
+
+<!-- ════════════════════════════ RESUMEN EJECUTIVO ════════════════════════════ -->
+<div class="page-wrap active" id="page-resumen">
+  <div class="topbar">
+    <div class="topbar-left"><h1>Resumen Ejecutivo</h1><p>Informe de Control Presupuestario — BISE · Enero–Mayo 2025</p></div>
+    <div class="topbar-actions">
+      <button class="btn">Exportar PDF</button>
+      <button class="btn btn-primary">Exportar Excel</button>
+    </div>
+  </div>
+  <div class="content">
+
+    <!-- KPIs presupuestarios -->
+    <div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Presupuesto</div>
+    <div class="kpi-grid" style="margin-bottom:16px">
+      <div class="kpi"><div class="kpi-label">Contratos activos</div><div class="kpi-val blue">4</div><div class="kpi-sub">Período analizado</div></div>
+      <div class="kpi"><div class="kpi-label">Pedidos procesados</div><div class="kpi-val">20</div><div class="kpi-sub">12 aprobados · 8 pendientes</div></div>
+      <div class="kpi"><div class="kpi-label">Presupuesto total</div><div class="kpi-val blue">$122,5M</div><div class="kpi-sub">Autorizado consolidado</div></div>
+      <div class="kpi"><div class="kpi-label">Monto aprobado</div><div class="kpi-val green">$69,3M</div><div class="kpi-sub">Descontado del presupuesto</div></div>
+      <div class="kpi"><div class="kpi-label">Disponible real</div><div class="kpi-val amber">$53,2M</div><div class="kpi-sub">Tras aprobaciones</div></div>
+      <div class="kpi"><div class="kpi-label">Comprometido</div><div class="kpi-val red">$60,7M</div><div class="kpi-sub">Pedidos no aprobados</div></div>
+      <div class="kpi"><div class="kpi-label">Exceso detectado</div><div class="kpi-val red">$11,0M</div><div class="kpi-sub">3 contratos en alerta</div></div>
+    </div>
+
+    <!-- KPIs de alertas semanales -->
+    <div style="font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Alertas esta semana (7–13 abril 2025)</div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(auto-fit,minmax(155px,1fr));margin-bottom:20px">
+      <div class="kpi" style="border-top:3px solid var(--blue)">
+        <div class="kpi-label">Alertas enviadas</div>
+        <div class="kpi-val blue">50</div>
+        <div class="kpi-sub">Correos automáticos</div>
+        <div class="kpi-trend up">↑ +12 vs semana anterior</div>
+      </div>
+      <div class="kpi" style="border-top:3px solid var(--green)">
+        <div class="kpi-label">Resueltas</div>
+        <div class="kpi-val green">22</div>
+        <div class="kpi-sub">Pedidos ajustados por contrato</div>
+        <div class="kpi-trend up">44% tasa de resolución</div>
+      </div>
+      <div class="kpi" style="border-top:3px solid var(--red)">
+        <div class="kpi-label">Pendientes</div>
+        <div class="kpi-val red">28</div>
+        <div class="kpi-sub">Sin resolución aún</div>
+        <div class="kpi-trend down">↑ 3 nuevas hoy</div>
+      </div>
+      <div class="kpi" style="border-top:3px solid var(--amber)">
+        <div class="kpi-label">En 2ª revisión</div>
+        <div class="kpi-val amber">7</div>
+        <div class="kpi-sub">Pedidos modificados en análisis</div>
+      </div>
+    </div>
+
+    <div class="alert-banner red">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none"><circle cx="8.5" cy="8.5" r="7.5" stroke="#DC2626" stroke-width="1.5"/><line x1="8.5" y1="5" x2="8.5" y2="9.5" stroke="#DC2626" stroke-width="1.8" stroke-linecap="round"/><circle cx="8.5" cy="11.8" r=".9" fill="#DC2626"/></svg>
+      <div>
+        <div class="alert-banner-title" style="color:var(--red)">Exceso presupuestario de $11.000.000 detectado esta semana</div>
+        <div class="alert-banner-sub">C-002, C-003 y C-004 tienen compromisos pendientes que superan el disponible. 50 alertas enviadas · 22 resueltas · 28 pendientes.</div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">Estado por contrato</div></div></div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Contrato</th><th>Disponible</th><th>Comprometido</th><th>Estado</th></tr></thead>
+            <tbody>
+              <tr><td class="mono bold">C-001</td><td class="mono">$26.600.000</td><td class="mono">$23.100.000</td><td><span class="badge b-green">✓ OK</span></td></tr>
+              <tr><td class="mono bold">C-002</td><td class="mono">$10.500.000</td><td class="mono" style="color:var(--red)">$13.400.000</td><td><span class="badge b-red">⚠ Alerta</span></td></tr>
+              <tr><td class="mono bold">C-003</td><td class="mono">$5.100.000</td><td class="mono" style="color:var(--red)">$8.700.000</td><td><span class="badge b-red">⚠ Alerta</span></td></tr>
+              <tr><td class="mono bold">C-004</td><td class="mono">$11.000.000</td><td class="mono" style="color:var(--red)">$15.500.000</td><td><span class="badge b-red">⚠ Alerta</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="card-title">Resolución de alertas — semana actual</div></div>
+        <!-- Donut visual -->
+        <div class="donut-wrap">
+          <svg class="donut-svg" width="110" height="110" viewBox="0 0 110 110">
+            <!-- Track -->
+            <circle cx="55" cy="55" r="40" fill="none" stroke="#F1F5F9" stroke-width="16"/>
+            <!-- Resolved: 22/50 = 44% → 251*.44=110.5deg → circumf=251.3 → 110.6 -->
+            <circle cx="55" cy="55" r="40" fill="none" stroke="#059669" stroke-width="16"
+              stroke-dasharray="110.5 251.3" stroke-dashoffset="62.8" stroke-linecap="round"/>
+            <!-- Pending: 28/50 = 56% → 140.7 -->
+            <circle cx="55" cy="55" r="40" fill="none" stroke="#DC2626" stroke-width="16"
+              stroke-dasharray="140.7 251.3" stroke-dashoffset="-148" stroke-linecap="round"/>
+            <text x="55" y="50" text-anchor="middle" font-size="20" font-weight="800" fill="#0F172A" font-family="'DM Mono',monospace">50</text>
+            <text x="55" y="65" text-anchor="middle" font-size="10" fill="#64748B" font-family="'Plus Jakarta Sans',sans-serif">alertas</text>
+          </svg>
+          <div class="donut-legend">
+            <div class="donut-legend-item">
+              <div class="donut-legend-dot" style="background:var(--green)"></div>
+              <span>Resueltas</span>
+              <span class="donut-legend-val" style="color:var(--green)">22</span>
+            </div>
+            <div class="donut-legend-item">
+              <div class="donut-legend-dot" style="background:var(--red)"></div>
+              <span>Pendientes</span>
+              <span class="donut-legend-val" style="color:var(--red)">28</span>
+            </div>
+            <div class="donut-legend-item">
+              <div class="donut-legend-dot" style="background:var(--amber)"></div>
+              <span>En 2ª revisión</span>
+              <span class="donut-legend-val" style="color:var(--amber)">7</span>
+            </div>
+            <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:11px;color:var(--gray)">
+              Las 22 alertas resueltas corresponden a pedidos<br>modificados por el contrato que en una segunda<br>revisión ya no superan el presupuesto disponible.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-title">Uso presupuestario global</div></div>
+      <div style="margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span style="font-weight:600">C-001 — Infraestructura TI</span><span class="mono" style="font-size:12px">41% aprobado</span></div>
+        <div class="budget-bar-track"><div class="budget-bar-fill" style="width:41%;background:var(--green)"></div><div class="budget-bar-committed" style="width:92%;background:var(--blue)"></div></div>
+        <div class="budget-bar-labels"><span>$0</span><span>$45M</span></div>
+      </div>
+      <div style="margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span style="font-weight:600">C-002 — Servicios Logísticos</span><span class="mono" style="font-size:12px;color:var(--red)">67% aprobado ⚠</span></div>
+        <div class="budget-bar-track"><div class="budget-bar-fill" style="width:67%;background:var(--amber)"></div><div class="budget-bar-committed" style="width:100%;background:var(--red)"></div></div>
+        <div class="budget-bar-labels"><span>$0</span><span>$32M</span></div>
+      </div>
+      <div style="margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span style="font-weight:600">C-003 — Marketing Digital</span><span class="mono" style="font-size:12px;color:var(--red)">72% aprobado ⚠</span></div>
+        <div class="budget-bar-track"><div class="budget-bar-fill" style="width:72%;background:var(--amber)"></div><div class="budget-bar-committed" style="width:100%;background:var(--red)"></div></div>
+        <div class="budget-bar-labels"><span>$0</span><span>$18M</span></div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span style="font-weight:600">C-004 — Mantención Equipos</span><span class="mono" style="font-size:12px;color:var(--red)">60% aprobado ⚠</span></div>
+        <div class="budget-bar-track"><div class="budget-bar-fill" style="width:60%;background:var(--amber)"></div><div class="budget-bar-committed" style="width:100%;background:var(--red)"></div></div>
+        <div class="budget-bar-labels"><span>$0</span><span>$27,5M</span></div>
+      </div>
+      <div style="display:flex;gap:14px;margin-top:14px;font-size:11px;color:var(--gray)">
+        <span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;background:var(--green);border-radius:2px"></span>Aprobado</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;background:var(--blue);border-radius:2px;opacity:.5"></span>Comprometido</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="display:inline-block;width:10px;height:10px;background:var(--red);border-radius:2px"></span>Exceso</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════ TRAZABILIDAD ════════════════════════════ -->
+<div class="page-wrap" id="page-trazabilidad">
+  <div class="topbar">
+    <div class="topbar-left"><h1>Trazabilidad</h1><p>Registro de auditoría completo — todas las acciones del sistema</p></div>
+    <div class="topbar-actions"><button class="btn">Exportar log</button></div>
+  </div>
+  <div class="content">
+
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
+      <div class="kpi"><div class="kpi-label">Eventos hoy</div><div class="kpi-val blue">47</div><div class="kpi-sub">Acciones registradas</div></div>
+      <div class="kpi"><div class="kpi-label">Alertas enviadas</div><div class="kpi-val red">50</div><div class="kpi-sub">Esta semana</div></div>
+      <div class="kpi"><div class="kpi-label">Contratos notificados</div><div class="kpi-val amber">4</div><div class="kpi-sub">Con actividad reciente</div></div>
+      <div class="kpi"><div class="kpi-label">Resoluciones</div><div class="kpi-val green">22</div><div class="kpi-sub">Segunda revisión OK</div></div>
+    </div>
+
+    <div class="grid2">
+
+      <div class="card" style="grid-column:1 / -1">
+        <div class="card-head"><div><div class="card-title">Línea de tiempo — actividad del sistema</div><div class="card-sub">Hoy, 9 de abril de 2025</div></div></div>
+        <div class="timeline">
+
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot green">✓</div><div class="tl-line"></div></div>
+            <div class="tl-body">
+              <div class="tl-title">Alerta C-002 resuelta — 2ª revisión aprobada</div>
+              <div class="tl-sub">El responsable del contrato C-002 (Servicios Logísticos) modificó el pedido <strong>P-0009</strong>, reduciendo el monto de $5.100.000 a $3.800.000. La segunda revisión automática confirma que el total comprometido ya no supera el presupuesto disponible. Alerta cerrada.</div>
+              <div class="tl-time">09:48 — Sistema BISE (Bot automático)</div>
+              <span class="tl-tag b-green">Resuelta</span>
+            </div>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot blue">✉</div><div class="tl-line"></div></div>
+            <div class="tl-body">
+              <div class="tl-title">Correo de alerta enviado a C-004</div>
+              <div class="tl-sub">Notificación automática enviada a <strong>paula.diaz@empresa.cl</strong> informando exceso de $4.500.000 en el contrato Mantención Equipos. Detalle de pedidos P-0019 y P-0020 adjunto en el correo.</div>
+              <div class="tl-time">09:35 — Sistema BISE (Bot automático)</div>
+              <span class="tl-tag b-amber">Pendiente respuesta</span>
+            </div>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot blue">✉</div><div class="tl-line"></div></div>
+            <div class="tl-body">
+              <div class="tl-title">Correo de alerta enviado a C-003</div>
+              <div class="tl-sub">Notificación enviada a <strong>luis.ramos@empresa.cl</strong> — exceso de $3.600.000 en Contrato Marketing Digital. Segunda notificación del período (primera enviada el 07/04).</div>
+              <div class="tl-time">09:33 — Sistema BISE (Bot automático)</div>
+              <span class="tl-tag b-amber">Pendiente respuesta</span>
+            </div>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot red">⚠</div><div class="tl-line"></div></div>
+            <div class="tl-body">
+              <div class="tl-title">Correo de alerta enviado a C-002 — Exceso presupuestario</div>
+              <div class="tl-sub">Notificación automática enviada a <strong>ana.vega@empresa.cl</strong>. Monto comprometido ($13.400.000) supera el disponible ($10.500.000) en $2.900.000. Se detallaron pedidos P-0009 y P-0010 como causantes del exceso.</div>
+              <div class="tl-time">09:30 — Sistema BISE (Bot automático)</div>
+              <span class="tl-tag b-red">Alerta activa</span>
+              <button class="btn btn-primary" style="margin-left:8px;padding:3px 10px;font-size:11px" onclick="showPage('correo', document.querySelector('.sb-item:nth-last-child(1)'))">Ver correo →</button>
+            </div>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot green">✓</div><div class="tl-line"></div></div>
+            <div class="tl-body">
+              <div class="tl-title">22 alertas resueltas esta semana — resumen</div>
+              <div class="tl-sub">De las 50 alertas enviadas entre el 7 y 9 de abril, 22 fueron resueltas exitosamente. Los responsables de contrato modificaron los montos de sus pedidos no aprobados; en la segunda revisión automática ninguno superó el presupuesto disponible. Contratos C-001, C-002 (parcial) y C-003 (parcial).</div>
+              <div class="tl-time">09:15 — Sistema BISE (Ciclo de revisión)</div>
+              <span class="tl-tag b-green">44% tasa de resolución</span>
+            </div>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot blue">🔄</div><div class="tl-line"></div></div>
+            <div class="tl-body">
+              <div class="tl-title">Ciclo de revisión automático ejecutado</div>
+              <div class="tl-sub">El sistema procesó 20 pedidos, comparó montos contra presupuesto y actualizó el estado de alertas. Se identificaron 3 contratos con exceso activo (C-002, C-003, C-004).</div>
+              <div class="tl-time">09:00 — Sistema BISE (Bot automático)</div>
+              <span class="tl-tag b-blue">Ciclo completado</span>
+            </div>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot amber">✏</div><div class="tl-line"></div></div>
+            <div class="tl-body">
+              <div class="tl-title">Responsable C-001 modificó pedido P-0004</div>
+              <div class="tl-sub"><strong>carlos.mora@empresa.cl</strong> redujo el monto del pedido P-0004 de $9.100.000 a $7.400.000. Tras la segunda revisión, el total comprometido de C-001 quedó dentro del presupuesto disponible. Alerta cerrada exitosamente.</div>
+              <div class="tl-time">08:41 — Usuario: carlos.mora</div>
+              <span class="tl-tag b-green">Resuelta</span>
+            </div>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot blue">✉</div><div class="tl-line"></div></div>
+            <div class="tl-body">
+              <div class="tl-title">Primera ronda de alertas semanales — 50 envíos</div>
+              <div class="tl-sub">El sistema envió la primera ronda de correos de alerta del período. 50 contratos o pedidos notificados en total. De estos, 28 corresponden a alertas nuevas y 22 a renotificaciones por falta de respuesta en los últimos 2 días.</div>
+              <div class="tl-time">07/04/2025 08:00 — Sistema BISE (Bot automático)</div>
+              <span class="tl-tag b-blue">50 correos enviados</span>
+            </div>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot gray">📋</div><div class="tl-line"></div></div>
+            <div class="tl-body">
+              <div class="tl-title">Actualización de datos maestros — C-004</div>
+              <div class="tl-sub">Se incorporó el correo <strong>paula.diaz@empresa.cl</strong> como responsable adicional para notificaciones del contrato Mantención Equipos (C-004).</div>
+              <div class="tl-time">07/04/2025 10:30 — Usuario: admin</div>
+              <span class="tl-tag b-gray">Datos maestros</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla histórica de alertas semanales -->
+    <div class="card">
+      <div class="card-head"><div><div class="card-title">Historial de alertas — semana 7–9 abril 2025</div><div class="card-sub">Registro detallado de cada alerta con estado de resolución</div></div></div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr><th>#</th><th>Fecha envío</th><th>Contrato</th><th>Destinatario</th><th>Exceso reportado</th><th>Estado</th><th>Resolución</th></tr></thead>
+          <tbody>
+            <tr><td class="mono" style="color:var(--gray)">AL-050</td><td>09/04 09:35</td><td class="mono bold">C-004</td><td>paula.diaz@empresa.cl</td><td class="mono" style="color:var(--red)">$4.500.000</td><td><span class="badge b-red">Pendiente</span></td><td style="color:var(--gray)">—</td></tr>
+            <tr><td class="mono" style="color:var(--gray)">AL-049</td><td>09/04 09:33</td><td class="mono bold">C-003</td><td>luis.ramos@empresa.cl</td><td class="mono" style="color:var(--red)">$3.600.000</td><td><span class="badge b-red">Pendiente</span></td><td style="color:var(--gray)">—</td></tr>
+            <tr><td class="mono" style="color:var(--gray)">AL-048</td><td>09/04 09:30</td><td class="mono bold">C-002</td><td>ana.vega@empresa.cl</td><td class="mono" style="color:var(--red)">$2.900.000</td><td><span class="badge b-red">Pendiente</span></td><td style="color:var(--gray)">—</td></tr>
+            <tr><td class="mono" style="color:var(--gray)">AL-047</td><td>08/04 16:12</td><td class="mono bold">C-002</td><td>ana.vega@empresa.cl</td><td class="mono">$1.200.000</td><td><span class="badge b-green">Resuelta</span></td><td style="font-size:12px;color:var(--green)">P-0009 reducido a $3.8M · 2ª rev. OK</td></tr>
+            <tr><td class="mono" style="color:var(--gray)">AL-046</td><td>08/04 15:50</td><td class="mono bold">C-003</td><td>luis.ramos@empresa.cl</td><td class="mono">$2.100.000</td><td><span class="badge b-green">Resuelta</span></td><td style="font-size:12px;color:var(--green)">P-0014 reducido a $3.2M · 2ª rev. OK</td></tr>
+            <tr><td class="mono" style="color:var(--gray)">AL-045</td><td>08/04 09:15</td><td class="mono bold">C-001</td><td>carlos.mora@empresa.cl</td><td class="mono">$900.000</td><td><span class="badge b-green">Resuelta</span></td><td style="font-size:12px;color:var(--green)">P-0004 reducido a $7.4M · 2ª rev. OK</td></tr>
+            <tr><td class="mono" style="color:var(--gray)">AL-044</td><td>07/04 11:00</td><td class="mono bold">C-004</td><td>paula.diaz@empresa.cl</td><td class="mono">$3.800.000</td><td><span class="badge b-amber">En 2ª revisión</span></td><td style="font-size:12px;color:var(--amber)">P-0019 modificado — revisión pendiente</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="padding-top:12px;font-size:12px;color:var(--gray);border-top:1px solid var(--border);margin-top:12px">
+        Mostrando 7 más recientes · Total semana: 50 enviadas · <span style="color:var(--green);font-weight:600">22 resueltas</span> · <span style="color:var(--red);font-weight:600">28 pendientes</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════ ALERTAS SEMANALES ════════════════════════════ -->
+<div class="page-wrap" id="page-alertas">
+  <div class="topbar">
+    <div class="topbar-left"><h1>Alertas Semanales</h1><p>Semana del 7 al 13 de abril de 2025 · Resolución por 2ª revisión</p></div>
+  </div>
+  <div class="content">
+    <div class="kpi-grid">
+      <div class="kpi"><div class="kpi-label">Enviadas</div><div class="kpi-val blue">50</div></div>
+      <div class="kpi"><div class="kpi-label">Resueltas</div><div class="kpi-val green">22</div></div>
+      <div class="kpi"><div class="kpi-label">Pendientes</div><div class="kpi-val red">28</div></div>
+      <div class="kpi"><div class="kpi-label">En 2ª revisión</div><div class="kpi-val amber">7</div></div>
+      <div class="kpi"><div class="kpi-label">Tasa resolución</div><div class="kpi-val green">44%</div></div>
+    </div>
+
+    <div class="alert-banner green">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none"><circle cx="8.5" cy="8.5" r="7.5" stroke="#059669" stroke-width="1.5"/><polyline points="5,9 8,12 13,5.5" stroke="#059669" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div>
+        <div class="alert-banner-title" style="color:var(--green)">22 alertas resueltas esta semana mediante 2ª revisión</div>
+        <div class="alert-banner-sub">Los responsables de contrato modificaron los montos de sus pedidos no aprobados. En una segunda revisión automática, los pedidos ajustados ya no superan el presupuesto disponible de su contrato.</div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <div class="card-head"><div class="card-title">¿Cómo funciona la resolución?</div></div>
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot red">1</div><div class="tl-line"></div></div>
+            <div class="tl-body">
+              <div class="tl-title">Sistema detecta exceso presupuestario</div>
+              <div class="tl-sub">Los pedidos no aprobados de un contrato superan el presupuesto disponible. Se genera alerta.</div>
+              <div class="tl-time">Automático — ciclo cada 4 horas</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot blue">2</div><div class="tl-line"></div></div>
+            <div class="tl-body">
+              <div class="tl-title">Correo automático enviado al responsable</div>
+              <div class="tl-sub">El sistema envía un correo detallando el contrato, monto en exceso y pedidos causantes.</div>
+              <div class="tl-time">Automático — inmediato tras detección</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot amber">3</div><div class="tl-line"></div></div>
+            <div class="tl-body">
+              <div class="tl-title">Responsable modifica el pedido</div>
+              <div class="tl-sub">El responsable del contrato ajusta el monto o elimina el pedido que estaba generando el exceso.</div>
+              <div class="tl-time">Acción manual del responsable</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot green">4</div></div>
+            <div class="tl-body">
+              <div class="tl-title">2ª revisión automática — alerta cerrada</div>
+              <div class="tl-sub">En el siguiente ciclo de revisión el sistema verifica que el total comprometido ya no supera el disponible. La alerta se marca como resuelta.</div>
+              <div class="tl-time">Automático — próximo ciclo de revisión</div>
+              <span class="tl-tag b-green">Alerta cerrada</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="card-title">Resoluciones por contrato esta semana</div></div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Contrato</th><th>Alertas</th><th>Resueltas</th><th>Pendientes</th><th>% Resolución</th></tr></thead>
+            <tbody>
+              <tr><td class="mono bold">C-001</td><td class="mono">8</td><td class="mono" style="color:var(--green)">8</td><td class="mono">0</td><td><span class="badge b-green">100%</span></td></tr>
+              <tr><td class="mono bold">C-002</td><td class="mono">14</td><td class="mono" style="color:var(--green)">7</td><td class="mono" style="color:var(--red)">7</td><td><span class="badge b-amber">50%</span></td></tr>
+              <tr><td class="mono bold">C-003</td><td class="mono">16</td><td class="mono" style="color:var(--green)">5</td><td class="mono" style="color:var(--red)">11</td><td><span class="badge b-red">31%</span></td></tr>
+              <tr><td class="mono bold">C-004</td><td class="mono">12</td><td class="mono" style="color:var(--green)">2</td><td class="mono" style="color:var(--red)">10</td><td><span class="badge b-red">17%</span></td></tr>
+              <tr class="total"><td>TOTAL</td><td class="mono">50</td><td class="mono" style="color:var(--green)">22</td><td class="mono" style="color:var(--red)">28</td><td><span class="badge b-amber">44%</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top:14px;font-size:12px;color:var(--gray);line-height:1.6">
+          C-001 resolvió el 100% de sus alertas esta semana.<br>
+          C-004 presenta la tasa de resolución más baja (17%) y el mayor exceso activo ($4.500.000).
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════ MODELO DE PROCESOS ════════════════════════════ -->
+<div class="page-wrap" id="page-modelo">
+  <div class="topbar"><div class="topbar-left"><h1>Modelo de Procesos</h1><p>Estructura y flujo del sistema de gestión presupuestaria</p></div></div>
+  <div class="content">
+    <div class="process-flow">
+      <div class="process-step ps-1">
+        <div class="process-step-num">1</div>
+        <div class="process-step-title">Gestionar Datos Maestros</div>
+        <div class="process-step-desc">Establece la información base para el control presupuestario. Asegura que cada contrato cuente con parámetros claros y vigentes.</div>
+        <ul class="process-activities">
+          <li><span class="dot"></span><span>Ejecutar para cada contrato activo</span></li>
+          <li><span class="dot"></span><span>Definir presupuesto máximo autorizado</span></li>
+          <li><span class="dot"></span><span>Establecer plazo de vigencia</span></li>
+          <li><span class="dot"></span><span>Incorporar correos de responsables</span></li>
+        </ul>
+      </div>
+      <div class="process-arrow"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 11h14M13 6l5 5-5 5" stroke="#CBD5E1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="process-step ps-2">
+        <div class="process-step-num">2</div>
+        <div class="process-step-title">Controlar Presupuesto</div>
+        <div class="process-step-desc">Monitorea preventivamente los compromisos potenciales antes de aprobación. Rol de alerta — no impacta el presupuesto.</div>
+        <ul class="process-activities">
+          <li><span class="dot"></span><span>Identificar pedidos no aprobados</span></li>
+          <li><span class="dot"></span><span>Seleccionar por estado, CECO y fecha</span></li>
+          <li><span class="dot"></span><span>Comparar monto vs. presupuesto disponible</span></li>
+          <li><span class="dot"></span><span>Detectar excesos potenciales</span></li>
+          <li><span class="dot"></span><span>Comunicar excesos a responsables</span></li>
+        </ul>
+      </div>
+      <div class="process-arrow"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 11h14M13 6l5 5-5 5" stroke="#CBD5E1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="process-step ps-3">
+        <div class="process-step-num">3</div>
+        <div class="process-step-title">Agotar Presupuesto</div>
+        <div class="process-step-desc">Formaliza el impacto presupuestario una vez aprobados los pedidos. Refleja el consumo efectivo de recursos.</div>
+        <ul class="process-activities">
+          <li><span class="dot"></span><span>Identificar pedidos aprobados</span></li>
+          <li><span class="dot"></span><span>Seleccionar con criterios consistentes</span></li>
+          <li><span class="dot"></span><span>Descontar monto del presupuesto</span></li>
+          <li><span class="dot"></span><span>Actualizar presupuesto disponible real</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">Visión integrada del modelo</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+        <div style="background:var(--blue-lt);border-radius:10px;padding:15px"><div style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:6px">Configuración de contratos</div><div style="font-size:12px;color:var(--text2);line-height:1.5">Establece las bases financieras: presupuesto, plazo y responsables de alerta.</div></div>
+        <div style="background:var(--amber-lt);border-radius:10px;padding:15px"><div style="font-size:12px;font-weight:700;color:var(--amber);margin-bottom:6px">Control de compromisos</div><div style="font-size:12px;color:var(--text2);line-height:1.5">Monitorea gastos pendientes para anticipar riesgos de sobregiro.</div></div>
+        <div style="background:var(--green-lt);border-radius:10px;padding:15px"><div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:6px">Ejecución presupuestaria</div><div style="font-size:12px;color:var(--text2);line-height:1.5">Implementa el gasto planificado al descontar pedidos aprobados.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════ DATOS MAESTROS ════════════════════════════ -->
+<div class="page-wrap" id="page-datos">
+  <div class="topbar"><div class="topbar-left"><h1>Datos Maestros</h1><p>Proceso 1 — Configuración base de contratos activos</p></div><div class="topbar-actions"><button class="btn btn-primary">+ Nuevo contrato</button></div></div>
+  <div class="content">
+    <div class="card">
+      <div class="card-head"><div class="card-title">Contratos configurados</div><span class="badge b-blue">4 activos</span></div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr><th>ID</th><th>Nombre contrato</th><th>Presupuesto</th><th>CECO</th><th>Plazo inicio</th><th>Plazo término</th><th>Responsable</th><th>Estado</th></tr></thead>
+          <tbody>
+            <tr><td class="mono bold" style="color:var(--blue)">C-001</td><td style="font-weight:600">Contrato Infraestructura TI</td><td class="mono">$45.000.000</td><td class="mono">CECO-10</td><td>01/01/2025</td><td>31/12/2025</td><td style="color:var(--blue)">carlos.mora@empresa.cl</td><td><span class="badge b-green">Activo</span></td></tr>
+            <tr><td class="mono bold" style="color:var(--blue)">C-002</td><td style="font-weight:600">Contrato Servicios Logísticos</td><td class="mono">$32.000.000</td><td class="mono">CECO-20</td><td>01/03/2025</td><td>30/09/2025</td><td style="color:var(--blue)">ana.vega@empresa.cl</td><td><span class="badge b-green">Activo</span></td></tr>
+            <tr><td class="mono bold" style="color:var(--blue)">C-003</td><td style="font-weight:600">Contrato Marketing Digital</td><td class="mono">$18.000.000</td><td class="mono">CECO-30</td><td>15/01/2025</td><td>30/06/2025</td><td style="color:var(--blue)">luis.ramos@empresa.cl</td><td><span class="badge b-green">Activo</span></td></tr>
+            <tr><td class="mono bold" style="color:var(--blue)">C-004</td><td style="font-weight:600">Contrato Mantención Equipos</td><td class="mono">$27.500.000</td><td class="mono">CECO-40</td><td>01/02/2025</td><td>30/11/2025</td><td style="color:var(--blue)">paula.diaz@empresa.cl</td><td><span class="badge b-green">Activo</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════ CONTROL PRESUPUESTARIO ════════════════════════════ -->
+<div class="page-wrap" id="page-control">
+  <div class="topbar"><div class="topbar-left"><h1>Control Presupuestario</h1><p>Proceso 2 — Monitoreo preventivo de pedidos no aprobados</p></div></div>
+  <div class="content">
+    <div class="alert-banner red"><svg width="17" height="17" viewBox="0 0 17 17" fill="none"><circle cx="8.5" cy="8.5" r="7.5" stroke="#DC2626" stroke-width="1.5"/><line x1="8.5" y1="5" x2="8.5" y2="9.5" stroke="#DC2626" stroke-width="1.8" stroke-linecap="round"/><circle cx="8.5" cy="11.8" r=".9" fill="#DC2626"/></svg><div><div class="alert-banner-title" style="color:var(--red)">3 contratos con alerta de exceso activa</div><div class="alert-banner-sub">C-002, C-003 y C-004 presentan pedidos no aprobados que superan el presupuesto disponible.</div></div></div>
+    <div class="card">
+      <div class="card-head"><div><div class="card-title">Alertas de exceso por contrato</div></div></div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr><th>Contrato</th><th>Nombre</th><th>Disponible</th><th>Comprometido</th><th>Exceso</th><th>Responsable</th><th>Estado</th></tr></thead>
+          <tbody>
+            <tr><td class="mono bold" style="color:var(--blue)">C-001</td><td>Infraestructura TI</td><td class="mono">$26.600.000</td><td class="mono">$23.100.000</td><td class="mono" style="color:var(--gray)">—</td><td style="font-size:12px">carlos.mora@empresa.cl</td><td><span class="badge b-green">✓ OK</span></td></tr>
+            <tr><td class="mono bold" style="color:var(--blue)">C-002</td><td>Servicios Logísticos</td><td class="mono">$10.500.000</td><td class="mono" style="color:var(--red)">$13.400.000</td><td class="mono bold" style="color:var(--red)">$2.900.000</td><td style="font-size:12px">ana.vega@empresa.cl</td><td><span class="badge b-red">⚠ Alerta</span></td></tr>
+            <tr><td class="mono bold" style="color:var(--blue)">C-003</td><td>Marketing Digital</td><td class="mono">$5.100.000</td><td class="mono" style="color:var(--red)">$8.700.000</td><td class="mono bold" style="color:var(--red)">$3.600.000</td><td style="font-size:12px">luis.ramos@empresa.cl</td><td><span class="badge b-red">⚠ Alerta</span></td></tr>
+            <tr><td class="mono bold" style="color:var(--blue)">C-004</td><td>Mantención Equipos</td><td class="mono">$11.000.000</td><td class="mono" style="color:var(--red)">$15.500.000</td><td class="mono bold" style="color:var(--red)">$4.500.000</td><td style="font-size:12px">paula.diaz@empresa.cl</td><td><span class="badge b-red">⚠ Alerta</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div><div class="card-title">Detalle de los 20 pedidos</div></div></div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr><th>Pedido</th><th>Contrato</th><th>CECO</th><th>Fecha</th><th>Monto</th><th>Estado</th><th>Impacto</th></tr></thead>
+          <tbody>
+            <tr><td class="mono bold">P-0001</td><td class="mono">C-001</td><td class="mono">CECO-10</td><td>2025-03-05</td><td class="mono">$3.200.000</td><td><span class="badge b-green">Aprobado</span></td><td><span class="badge b-blue">Descuenta presupuesto</span></td></tr>
+            <tr><td class="mono bold">P-0002</td><td class="mono">C-001</td><td class="mono">CECO-10</td><td>2025-03-12</td><td class="mono">$8.700.000</td><td><span class="badge b-green">Aprobado</span></td><td><span class="badge b-blue">Descuenta presupuesto</span></td></tr>
+            <tr><td class="mono bold">P-0003</td><td class="mono">C-001</td><td class="mono">CECO-10</td><td>2025-04-01</td><td class="mono">$6.500.000</td><td><span class="badge b-green">Aprobado</span></td><td><span class="badge b-blue">Descuenta presupuesto</span></td></tr>
+            <tr><td class="mono bold">P-0004</td><td class="mono">C-001</td><td class="mono">CECO-10</td><td>2025-04-18</td><td class="mono">$9.100.000</td><td><span class="badge b-amber">No aprobado</span></td><td><span class="badge b-amber">Compromiso potencial</span></td></tr>
+            <tr><td class="mono bold">P-0005</td><td class="mono">C-001</td><td class="mono">CECO-10</td><td>2025-05-02</td><td class="mono">$14.000.000</td><td><span class="badge b-amber">No aprobado</span></td><td><span class="badge b-amber">Compromiso potencial</span></td></tr>
+            <tr><td class="mono bold">P-0006</td><td class="mono">C-002</td><td class="mono">CECO-20</td><td>2025-03-08</td><td class="mono">$4.500.000</td><td><span class="badge b-green">Aprobado</span></td><td><span class="badge b-blue">Descuenta presupuesto</span></td></tr>
+            <tr><td class="mono bold">P-0007</td><td class="mono">C-002</td><td class="mono">CECO-20</td><td>2025-03-22</td><td class="mono">$7.200.000</td><td><span class="badge b-green">Aprobado</span></td><td><span class="badge b-blue">Descuenta presupuesto</span></td></tr>
+            <tr><td class="mono bold">P-0008</td><td class="mono">C-002</td><td class="mono">CECO-20</td><td>2025-04-10</td><td class="mono">$9.800.000</td><td><span class="badge b-green">Aprobado</span></td><td><span class="badge b-blue">Descuenta presupuesto</span></td></tr>
+            <tr><td class="mono bold">P-0009</td><td class="mono">C-002</td><td class="mono">CECO-20</td><td>2025-04-29</td><td class="mono">$5.100.000</td><td><span class="badge b-amber">No aprobado</span></td><td><span class="badge b-amber">Compromiso potencial</span></td></tr>
+            <tr><td class="mono bold">P-0010</td><td class="mono">C-002</td><td class="mono">CECO-20</td><td>2025-05-15</td><td class="mono">$8.300.000</td><td><span class="badge b-amber">No aprobado</span></td><td><span class="badge b-amber">Compromiso potencial</span></td></tr>
+            <tr><td class="mono bold">P-0011</td><td class="mono">C-003</td><td class="mono">CECO-30</td><td>2025-02-10</td><td class="mono">$3.100.000</td><td><span class="badge b-green">Aprobado</span></td><td><span class="badge b-blue">Descuenta presupuesto</span></td></tr>
+            <tr><td class="mono bold">P-0012</td><td class="mono">C-003</td><td class="mono">CECO-30</td><td>2025-02-28</td><td class="mono">$4.600.000</td><td><span class="badge b-green">Aprobado</span></td><td><span class="badge b-blue">Descuenta presupuesto</span></td></tr>
+            <tr><td class="mono bold">P-0013</td><td class="mono">C-003</td><td class="mono">CECO-30</td><td>2025-03-20</td><td class="mono">$5.200.000</td><td><span class="badge b-green">Aprobado</span></td><td><span class="badge b-blue">Descuenta presupuesto</span></td></tr>
+            <tr><td class="mono bold">P-0014</td><td class="mono">C-003</td><td class="mono">CECO-30</td><td>2025-04-05</td><td class="mono">$4.900.000</td><td><span class="badge b-amber">No aprobado</span></td><td><span class="badge b-amber">Compromiso potencial</span></td></tr>
+            <tr><td class="mono bold">P-0015</td><td class="mono">C-003</td><td class="mono">CECO-30</td><td>2025-04-20</td><td class="mono">$3.800.000</td><td><span class="badge b-amber">No aprobado</span></td><td><span class="badge b-amber">Compromiso potencial</span></td></tr>
+            <tr><td class="mono bold">P-0016</td><td class="mono">C-004</td><td class="mono">CECO-40</td><td>2025-03-03</td><td class="mono">$6.200.000</td><td><span class="badge b-green">Aprobado</span></td><td><span class="badge b-blue">Descuenta presupuesto</span></td></tr>
+            <tr><td class="mono bold">P-0017</td><td class="mono">C-004</td><td class="mono">CECO-40</td><td>2025-03-18</td><td class="mono">$5.500.000</td><td><span class="badge b-green">Aprobado</span></td><td><span class="badge b-blue">Descuenta presupuesto</span></td></tr>
+            <tr><td class="mono bold">P-0018</td><td class="mono">C-004</td><td class="mono">CECO-40</td><td>2025-04-08</td><td class="mono">$4.800.000</td><td><span class="badge b-green">Aprobado</span></td><td><span class="badge b-blue">Descuenta presupuesto</span></td></tr>
+            <tr><td class="mono bold">P-0019</td><td class="mono">C-004</td><td class="mono">CECO-40</td><td>2025-04-25</td><td class="mono">$7.100.000</td><td><span class="badge b-amber">No aprobado</span></td><td><span class="badge b-amber">Compromiso potencial</span></td></tr>
+            <tr><td class="mono bold">P-0020</td><td class="mono">C-004</td><td class="mono">CECO-40</td><td>2025-05-10</td><td class="mono">$8.400.000</td><td><span class="badge b-amber">No aprobado</span></td><td><span class="badge b-amber">Compromiso potencial</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════ EJECUCIÓN ════════════════════════════ -->
+<div class="page-wrap" id="page-ejecucion">
+  <div class="topbar"><div class="topbar-left"><h1>Ejecución Presupuestaria</h1><p>Proceso 3 — Agotamiento formal por pedidos aprobados</p></div></div>
+  <div class="content">
+    <div class="kpi-grid">
+      <div class="kpi"><div class="kpi-label">Presupuesto total</div><div class="kpi-val blue">$122,5M</div></div>
+      <div class="kpi"><div class="kpi-label">Descontado</div><div class="kpi-val green">$69,3M</div><div class="kpi-sub">Pedidos aprobados</div></div>
+      <div class="kpi"><div class="kpi-label">Disponible real</div><div class="kpi-val amber">$53,2M</div></div>
+      <div class="kpi"><div class="kpi-label">Comprometido</div><div class="kpi-val red">$60,7M</div></div>
+      <div class="kpi"><div class="kpi-label">Exceso total</div><div class="kpi-val red">$11,0M</div></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div class="card-title">Resumen consolidado</div></div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr><th>Contrato</th><th>Nombre</th><th>Presupuesto</th><th>Descontado</th><th>Disponible</th><th>Comprometido</th><th>Exceso</th></tr></thead>
+          <tbody>
+            <tr><td class="mono bold" style="color:var(--blue)">C-001</td><td>Infraestructura TI</td><td class="mono">$45.000.000</td><td class="mono" style="color:var(--green)">$18.400.000</td><td class="mono">$26.600.000</td><td class="mono">$23.100.000</td><td class="mono" style="color:var(--gray)">—</td></tr>
+            <tr><td class="mono bold" style="color:var(--blue)">C-002</td><td>Servicios Logísticos</td><td class="mono">$32.000.000</td><td class="mono" style="color:var(--green)">$21.500.000</td><td class="mono">$10.500.000</td><td class="mono" style="color:var(--red)">$13.400.000</td><td class="mono bold" style="color:var(--red)">$2.900.000</td></tr>
+            <tr><td class="mono bold" style="color:var(--blue)">C-003</td><td>Marketing Digital</td><td class="mono">$18.000.000</td><td class="mono" style="color:var(--green)">$12.900.000</td><td class="mono">$5.100.000</td><td class="mono" style="color:var(--red)">$8.700.000</td><td class="mono bold" style="color:var(--red)">$3.600.000</td></tr>
+            <tr><td class="mono bold" style="color:var(--blue)">C-004</td><td>Mantención Equipos</td><td class="mono">$27.500.000</td><td class="mono" style="color:var(--green)">$16.500.000</td><td class="mono">$11.000.000</td><td class="mono" style="color:var(--red)">$15.500.000</td><td class="mono bold" style="color:var(--red)">$4.500.000</td></tr>
+            <tr class="total"><td colspan="2">TOTALES</td><td class="mono">$122.500.000</td><td class="mono">$69.300.000</td><td class="mono">$53.200.000</td><td class="mono" style="color:var(--red)">$60.700.000</td><td class="mono bold" style="color:var(--red)">$11.000.000</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════ DETALLE CONTRATOS ════════════════════════════ -->
+<div class="page-wrap" id="page-contratos">
+  <div class="topbar"><div class="topbar-left"><h1>Detalle por Contrato</h1><p>Análisis individual de cada contrato activo</p></div></div>
+  <div class="content">
+    <div class="contract-card">
+      <div class="contract-card-head"><div><div class="contract-id">C-001 · CECO-10</div><div class="contract-name">Contrato Infraestructura TI</div><div class="contract-meta">Plazo: 01/01/2025 – 31/12/2025 · carlos.mora@empresa.cl</div></div><span class="badge b-green" style="padding:5px 12px">✓ Sin exceso</span></div>
+      <div class="contract-numbers"><div class="cn"><div class="cn-label">Presupuesto</div><div class="cn-val">$45.000.000</div></div><div class="cn"><div class="cn-label">Aprobado</div><div class="cn-val" style="color:var(--green)">$18.400.000</div></div><div class="cn"><div class="cn-label">Disponible</div><div class="cn-val" style="color:var(--amber)">$26.600.000</div></div><div class="cn"><div class="cn-label">Comprometido</div><div class="cn-val">$23.100.000</div></div></div>
+      <div style="font-size:12px;color:var(--gray);margin-bottom:6px">Uso aprobado: <strong>41%</strong></div>
+      <div class="budget-bar-track"><div class="budget-bar-fill" style="width:41%;background:var(--green)"></div></div>
+      <div class="tbl-wrap" style="margin-top:12px"><table class="tbl"><thead><tr><th>Pedido</th><th>CECO</th><th>Fecha</th><th>Monto</th><th>Estado</th></tr></thead><tbody><tr><td class="mono">P-0001</td><td class="mono">CECO-10</td><td>2025-03-05</td><td class="mono">$3.200.000</td><td><span class="badge b-green">Aprobado</span></td></tr><tr><td class="mono">P-0002</td><td class="mono">CECO-10</td><td>2025-03-12</td><td class="mono">$8.700.000</td><td><span class="badge b-green">Aprobado</span></td></tr><tr><td class="mono">P-0003</td><td class="mono">CECO-10</td><td>2025-04-01</td><td class="mono">$6.500.000</td><td><span class="badge b-green">Aprobado</span></td></tr><tr><td class="mono">P-0004</td><td class="mono">CECO-10</td><td>2025-04-18</td><td class="mono">$9.100.000</td><td><span class="badge b-amber">No aprobado</span></td></tr><tr><td class="mono">P-0005</td><td class="mono">CECO-10</td><td>2025-05-02</td><td class="mono">$14.000.000</td><td><span class="badge b-amber">No aprobado</span></td></tr></tbody></table></div>
+    </div>
+    <div class="contract-card alert">
+      <div class="contract-card-head"><div><div class="contract-id">C-002 · CECO-20</div><div class="contract-name">Contrato Servicios Logísticos</div><div class="contract-meta">Plazo: 01/03/2025 – 30/09/2025 · ana.vega@empresa.cl</div></div><span class="badge b-red" style="padding:5px 12px">⚠ Exceso $2.900.000</span></div>
+      <div class="contract-numbers"><div class="cn"><div class="cn-label">Presupuesto</div><div class="cn-val">$32.000.000</div></div><div class="cn"><div class="cn-label">Aprobado</div><div class="cn-val" style="color:var(--green)">$21.500.000</div></div><div class="cn"><div class="cn-label">Disponible</div><div class="cn-val" style="color:var(--amber)">$10.500.000</div></div><div class="cn"><div class="cn-label">Comprometido</div><div class="cn-val" style="color:var(--red)">$13.400.000</div></div></div>
+      <div style="font-size:12px;color:var(--gray);margin-bottom:6px">Uso aprobado: <strong style="color:var(--amber)">67%</strong></div>
+      <div class="budget-bar-track"><div class="budget-bar-fill" style="width:67%;background:var(--amber)"></div><div class="budget-bar-committed" style="width:100%;background:var(--red)"></div></div>
+      <div class="tbl-wrap" style="margin-top:12px"><table class="tbl"><thead><tr><th>Pedido</th><th>CECO</th><th>Fecha</th><th>Monto</th><th>Estado</th></tr></thead><tbody><tr><td class="mono">P-0006</td><td class="mono">CECO-20</td><td>2025-03-08</td><td class="mono">$4.500.000</td><td><span class="badge b-green">Aprobado</span></td></tr><tr><td class="mono">P-0007</td><td class="mono">CECO-20</td><td>2025-03-22</td><td class="mono">$7.200.000</td><td><span class="badge b-green">Aprobado</span></td></tr><tr><td class="mono">P-0008</td><td class="mono">CECO-20</td><td>2025-04-10</td><td class="mono">$9.800.000</td><td><span class="badge b-green">Aprobado</span></td></tr><tr><td class="mono">P-0009</td><td class="mono">CECO-20</td><td>2025-04-29</td><td class="mono">$5.100.000</td><td><span class="badge b-amber">No aprobado</span></td></tr><tr><td class="mono">P-0010</td><td class="mono">CECO-20</td><td>2025-05-15</td><td class="mono">$8.300.000</td><td><span class="badge b-amber">No aprobado</span></td></tr></tbody></table></div>
+    </div>
+    <div class="contract-card alert">
+      <div class="contract-card-head"><div><div class="contract-id">C-003 · CECO-30</div><div class="contract-name">Contrato Marketing Digital</div><div class="contract-meta">Plazo: 15/01/2025 – 30/06/2025 · luis.ramos@empresa.cl</div></div><span class="badge b-red" style="padding:5px 12px">⚠ Exceso $3.600.000</span></div>
+      <div class="contract-numbers"><div class="cn"><div class="cn-label">Presupuesto</div><div class="cn-val">$18.000.000</div></div><div class="cn"><div class="cn-label">Aprobado</div><div class="cn-val" style="color:var(--green)">$12.900.000</div></div><div class="cn"><div class="cn-label">Disponible</div><div class="cn-val" style="color:var(--red)">$5.100.000</div></div><div class="cn"><div class="cn-label">Comprometido</div><div class="cn-val" style="color:var(--red)">$8.700.000</div></div></div>
+      <div style="font-size:12px;color:var(--gray);margin-bottom:6px">Uso aprobado: <strong style="color:var(--amber)">72%</strong></div>
+      <div class="budget-bar-track"><div class="budget-bar-fill" style="width:72%;background:var(--amber)"></div><div class="budget-bar-committed" style="width:100%;background:var(--red)"></div></div>
+    </div>
+    <div class="contract-card alert">
+      <div class="contract-card-head"><div><div class="contract-id">C-004 · CECO-40</div><div class="contract-name">Contrato Mantención Equipos</div><div class="contract-meta">Plazo: 01/02/2025 – 30/11/2025 · paula.diaz@empresa.cl</div></div><span class="badge b-red" style="padding:5px 12px">⚠ Exceso $4.500.000</span></div>
+      <div class="contract-numbers"><div class="cn"><div class="cn-label">Presupuesto</div><div class="cn-val">$27.500.000</div></div><div class="cn"><div class="cn-label">Aprobado</div><div class="cn-val" style="color:var(--green)">$16.500.000</div></div><div class="cn"><div class="cn-label">Disponible</div><div class="cn-val" style="color:var(--amber)">$11.000.000</div></div><div class="cn"><div class="cn-label">Comprometido</div><div class="cn-val" style="color:var(--red)">$15.500.000</div></div></div>
+      <div style="font-size:12px;color:var(--gray);margin-bottom:6px">Uso aprobado: <strong style="color:var(--amber)">60%</strong></div>
+      <div class="budget-bar-track"><div class="budget-bar-fill" style="width:60%;background:var(--amber)"></div><div class="budget-bar-committed" style="width:100%;background:var(--red)"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════ CORREO DE ALERTA ════════════════════════════ -->
+<div class="page-wrap" id="page-correo">
+  <div class="topbar">
+    <div class="topbar-left"><h1>Correo de Alerta</h1><p>Simulación de notificación automática enviada al responsable del contrato C-002</p></div>
+    <div class="topbar-actions">
+      <span class="badge b-red" style="padding:5px 12px;font-size:12px">⚠ Alerta activa</span>
+    </div>
+  </div>
+  <div class="content">
+
+    <div class="alert-banner amber">
+      <svg width="17" height="17" viewBox="0 0 17 17" fill="none"><circle cx="8.5" cy="8.5" r="7.5" stroke="#D97706" stroke-width="1.5"/><line x1="8.5" y1="5" x2="8.5" y2="9.5" stroke="#D97706" stroke-width="1.8" stroke-linecap="round"/><circle cx="8.5" cy="11.8" r=".9" fill="#D97706"/></svg>
+      <div>
+        <div class="alert-banner-title" style="color:var(--amber)">Este es el correo automático enviado al responsable del contrato C-002</div>
+        <div class="alert-banner-sub">El sistema BISE envió esta notificación a <strong>ana.vega@empresa.cl</strong> el 09/04/2025 a las 09:30. El hilo incluye la respuesta de la responsable y la segunda revisión.</div>
+      </div>
+    </div>
+
+    <!-- EMAIL VIEWER -->
+    <div class="email-panel">
+      <!-- Header del correo original -->
+      <div class="email-header">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+          <div class="email-subject">⚠ Alerta de exceso presupuestario — Contrato C-002 Servicios Logísticos</div>
+          <div style="flex-shrink:0;font-size:11px;color:var(--gray);font-family:var(--mono);white-space:nowrap">09/04/2025 09:30</div>
+        </div>
+        <div class="email-meta-row"><span class="email-meta-label">De</span><span class="email-meta-val">Sistema BISE &lt;no-reply@bise.empresa.cl&gt;</span></div>
+        <div class="email-meta-row"><span class="email-meta-label">Para</span><span class="email-meta-val"><a href="#">Ana Vega &lt;ana.vega@empresa.cl&gt;</a></span></div>
+        <div class="email-meta-row"><span class="email-meta-label">CC</span><span class="email-meta-val" style="color:var(--gray)">control.presupuestario@empresa.cl · jaime.bulo@empresa.cl</span></div>
+        <div class="email-badges">
+          <span class="badge b-red">⚠ Exceso presupuestario</span>
+          <span class="badge b-blue">C-002 · CECO-20</span>
+          <span class="badge b-gray">Generado automáticamente</span>
+        </div>
+      </div>
+
+      <!-- Cuerpo del correo -->
+      <div class="email-body">
+        <p>Estimada Ana,</p>
+        <p>El sistema de Control Presupuestario BISE ha detectado que el contrato bajo su responsabilidad presenta un <strong>exceso presupuestario potencial</strong> que requiere atención inmediata.</p>
+
+        <h3>Resumen del contrato</h3>
+        <table>
+          <thead><tr><th>Campo</th><th>Valor</th></tr></thead>
+          <tbody>
+            <tr><td>Contrato</td><td><strong>C-002 — Servicios Logísticos</strong></td></tr>
+            <tr><td>CECO</td><td>CECO-20</td></tr>
+            <tr><td>Período de vigencia</td><td>01/03/2025 — 30/09/2025</td></tr>
+            <tr><td>Presupuesto total autorizado</td><td style="font-family:var(--mono)">$32.000.000</td></tr>
+            <tr><td>Monto aprobado (descontado)</td><td style="font-family:var(--mono);color:var(--green)">$21.500.000</td></tr>
+            <tr><td>Presupuesto disponible</td><td style="font-family:var(--mono);font-weight:700">$10.500.000</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Detalle del exceso detectado</h3>
+        <div class="highlight-box">
+          <div style="display:flex;gap:24px;flex-wrap:wrap">
+            <div><div style="font-size:11px;font-weight:600;color:var(--red);text-transform:uppercase;letter-spacing:.05em">Monto comprometido</div><div style="font-size:20px;font-weight:800;font-family:var(--mono);color:var(--red)">$13.400.000</div></div>
+            <div><div style="font-size:11px;font-weight:600;color:var(--red);text-transform:uppercase;letter-spacing:.05em">Presupuesto disponible</div><div style="font-size:20px;font-weight:800;font-family:var(--mono)">$10.500.000</div></div>
+            <div><div style="font-size:11px;font-weight:600;color:var(--red);text-transform:uppercase;letter-spacing:.05em">Exceso potencial</div><div style="font-size:20px;font-weight:800;font-family:var(--mono);color:var(--red)">$2.900.000</div></div>
+          </div>
+        </div>
+
+        <h3>Pedidos no aprobados que generan el exceso</h3>
+        <table>
+          <thead><tr><th>N° Pedido</th><th>CECO</th><th>Fecha creación</th><th>Monto</th><th>Estado</th></tr></thead>
+          <tbody>
+            <tr><td style="font-family:var(--mono);font-weight:700">P-0009</td><td>CECO-20</td><td>2025-04-29</td><td style="font-family:var(--mono);color:var(--red)">$5.100.000</td><td><span class="badge b-amber">No aprobado</span></td></tr>
+            <tr><td style="font-family:var(--mono);font-weight:700">P-0010</td><td>CECO-20</td><td>2025-05-15</td><td style="font-family:var(--mono);color:var(--red)">$8.300.000</td><td><span class="badge b-amber">No aprobado</span></td></tr>
+          </tbody>
+        </table>
+
+        <h3>Acción requerida</h3>
+        <p>Para resolver esta alerta, le solicitamos revisar los pedidos indicados y <strong>reducir o eliminar aquellos cuyos montos generen el exceso presupuestario</strong>. Una vez realizado el ajuste, el sistema ejecutará automáticamente una segunda revisión en el próximo ciclo (máximo 4 horas).</p>
+        <p>Si el total comprometido queda por debajo del presupuesto disponible, la alerta será cerrada automáticamente y recibirá una notificación de confirmación.</p>
+
+        <div class="sig">
+          Sistema de Control Presupuestario BISE<br>
+          Gestión Automática de Pedidos · no-reply@bise.empresa.cl<br>
+          <em>Este es un correo automático. Para consultas, contacte a control.presupuestario@empresa.cl</em>
+        </div>
+      </div>
+
+      <!-- Acciones del correo original -->
+      <div class="email-actions">
+        <span style="font-size:12px;color:var(--gray)">Enviado automáticamente por el sistema BISE · 09/04/2025 09:30</span>
+      </div>
+
+      <!-- HILO: Respuesta de Ana Vega -->
+      <div class="email-thread">
+        <div class="thread-reply">
+          <div class="thread-reply-header" onclick="toggleReply('reply-ana')">
+            <div class="thread-reply-avatar" style="background:#E0E7FF;color:#3730A3">AV</div>
+            <div class="thread-reply-meta">
+              <div class="thread-reply-from">Ana Vega &lt;ana.vega@empresa.cl&gt;</div>
+              <div class="thread-reply-preview">Entendido, voy a revisar los pedidos ahora mismo. El P-0009 lo puedo ajustar...</div>
+            </div>
+            <div class="thread-reply-time">09/04/2025 09:58</div>
+            <svg style="margin-left:8px;flex-shrink:0;transition:transform .2s" id="arrow-reply-ana" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="#64748B" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+          <div class="thread-reply-body" id="reply-ana">
+            <p>Buenos días,</p>
+            <p>Recibí la alerta. Voy a revisar los pedidos P-0009 y P-0010 de inmediato.</p>
+            <p>Después de analizar, el pedido <strong>P-0009</strong> puede reducirse a <strong>$3.800.000</strong>, ya que parte del servicio logístico quedó fuera del alcance original. El P-0010 por ahora lo mantenemos porque es un compromiso firme.</p>
+            <p>Realizo el ajuste ahora mismo en el sistema.</p>
+            <p style="color:var(--gray);font-size:12px;margin-top:16px">Ana Vega · Responsable C-002 Servicios Logísticos</p>
+          </div>
+        </div>
+
+        <!-- Respuesta del sistema tras 2ª revisión -->
+        <div class="thread-reply">
+          <div class="thread-reply-header" onclick="toggleReply('reply-bise')">
+            <div class="thread-reply-avatar" style="background:#EFF6FF;color:#2563EB">🤖</div>
+            <div class="thread-reply-meta">
+              <div class="thread-reply-from">Sistema BISE &lt;no-reply@bise.empresa.cl&gt;</div>
+              <div class="thread-reply-preview" style="color:var(--green);font-weight:600">✓ Alerta resuelta — 2ª revisión aprobada · Contrato C-002</div>
+            </div>
+            <div class="thread-reply-time">09/04/2025 10:15</div>
+            <svg style="margin-left:8px;flex-shrink:0;transition:transform .2s" id="arrow-reply-bise" width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="#64748B" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+          <div class="thread-reply-body" id="reply-bise">
+            <p>Estimada Ana,</p>
+            <p>El sistema ha ejecutado la <strong>segunda revisión automática</strong> del contrato C-002 tras la modificación del pedido P-0009 y confirma lo siguiente:</p>
+
+            <div class="highlight-box green">
+              <div style="display:flex;gap:24px;flex-wrap:wrap">
+                <div><div style="font-size:11px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:.05em">Total comprometido (revisado)</div><div style="font-size:20px;font-weight:800;font-family:var(--mono);color:var(--green)">$12.100.000</div></div>
+                <div><div style="font-size:11px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:.05em">Presupuesto disponible</div><div style="font-size:20px;font-weight:800;font-family:var(--mono)">$10.500.000</div></div>
+              </div>
+              <div style="margin-top:12px;font-size:13px;color:var(--green);font-weight:600">✓ El exceso fue eliminado. La alerta AL-048 ha sido cerrada exitosamente.</div>
+            </div>
+
+            <table>
+              <thead><tr><th>Pedido</th><th>Monto original</th><th>Monto ajustado</th><th>Cambio</th></tr></thead>
+              <tbody>
+                <tr><td style="font-family:var(--mono)">P-0009</td><td style="font-family:var(--mono)">$5.100.000</td><td style="font-family:var(--mono);color:var(--green)">$3.800.000</td><td style="font-family:var(--mono);color:var(--green)">-$1.300.000</td></tr>
+                <tr><td style="font-family:var(--mono)">P-0010</td><td style="font-family:var(--mono)">$8.300.000</td><td style="font-family:var(--mono)">$8.300.000</td><td style="color:var(--gray)">Sin cambio</td></tr>
+              </tbody>
+            </table>
+
+            <p style="margin-top:12px">No se requiere ninguna acción adicional de su parte. Este caso quedará registrado en el log de trazabilidad del sistema.</p>
+
+            <div class="sig">
+              Sistema de Control Presupuestario BISE<br>
+              Alerta AL-048 · Cerrada el 09/04/2025 a las 10:15<br>
+              <em>Resolución por 2ª revisión automática</em>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estado final -->
+    <div class="card">
+      <div class="card-head"><div class="card-title">Estado final de la alerta AL-048</div></div>
+      <div class="timeline">
+        <div class="tl-item"><div class="tl-left"><div class="tl-dot blue">✉</div><div class="tl-line"></div></div><div class="tl-body"><div class="tl-title">Correo de alerta enviado</div><div class="tl-sub">Sistema BISE detectó exceso de $2.900.000 en C-002 y notificó a ana.vega@empresa.cl.</div><div class="tl-time">09/04/2025 09:30</div></div></div>
+        <div class="tl-item"><div class="tl-left"><div class="tl-dot amber">✏</div><div class="tl-line"></div></div><div class="tl-body"><div class="tl-title">Responsable modificó P-0009</div><div class="tl-sub">Ana Vega redujo el monto del pedido P-0009 de $5.100.000 a $3.800.000 (-$1.300.000).</div><div class="tl-time">09/04/2025 09:58 — ana.vega</div></div></div>
+        <div class="tl-item"><div class="tl-left"><div class="tl-dot blue">🔄</div><div class="tl-line"></div></div><div class="tl-body"><div class="tl-title">Segunda revisión automática ejecutada</div><div class="tl-sub">El sistema verificó el nuevo total comprometido ($12.100.000) contra el disponible ($10.500.000). El exceso fue eliminado.</div><div class="tl-time">09/04/2025 10:15 — Bot BISE</div></div></div>
+        <div class="tl-item"><div class="tl-left"><div class="tl-dot green">✓</div></div><div class="tl-body"><div class="tl-title">Alerta AL-048 cerrada exitosamente</div><div class="tl-sub">Tiempo de resolución: 45 minutos. Pedido ajustado dentro del presupuesto disponible.</div><div class="tl-time">09/04/2025 10:15 — Bot BISE</div><span class="tl-tag b-green">Resuelta en 45 min</span></div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+/* ── Credentials ── */
+var USERS = {
+  'admin@empresa.cl':        { pass:'bise2025', name:'Jaime Bulo',       role:'Administrador',   initials:'JB' },
+  'carlos.mora@empresa.cl':  { pass:'bise2025', name:'Carlos Mora',      role:'C-001 · Infraestructura TI', initials:'CM' },
+  'ana.vega@empresa.cl':     { pass:'bise2025', name:'Ana Vega',         role:'C-002 · Servicios Logísticos', initials:'AV' },
+  'luis.ramos@empresa.cl':   { pass:'bise2025', name:'Luis Ramos',       role:'C-003 · Marketing Digital', initials:'LR' },
+  'paula.diaz@empresa.cl':   { pass:'bise2025', name:'Paula Díaz',       role:'C-004 · Mantención Equipos', initials:'PD' },
+};
+
+function doLogin() {
+  var u = document.getElementById('login-user').value.trim().toLowerCase();
+  var p = document.getElementById('login-pass').value;
+  var err = document.getElementById('login-error');
+  var btn = document.getElementById('login-btn');
+  if (!u || !p) { err.style.display = 'block'; err.textContent = 'Completa todos los campos.'; return; }
+  btn.disabled = true; btn.textContent = 'Verificando…';
+  setTimeout(function () {
+    btn.disabled = false; btn.textContent = 'Ingresar al sistema';
+    if (USERS[u] && USERS[u].pass === p) {
+      err.style.display = 'none';
+      enterApp(USERS[u]);
+    } else {
+      err.style.display = 'block';
+      err.textContent = 'Usuario o contraseña incorrectos.';
+      document.getElementById('login-pass').value = '';
+    }
+  }, 700);
+}
+
+function doSSOLogin() {
+  var btn = document.querySelector('.login-sso');
+  btn.disabled = true; btn.textContent = 'Redirigiendo a Ping Federate…';
+  setTimeout(function () { enterApp(USERS['admin@empresa.cl']); }, 900);
+}
+
+function enterApp(user) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-shell').style.display = 'flex';
+  document.getElementById('sb-name').textContent    = user.name;
+  document.getElementById('sb-role').textContent    = user.role;
+  document.getElementById('sb-avatar').textContent  = user.initials;
+}
+
+function doLogout() {
+  document.getElementById('app-shell').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-error').style.display = 'none';
+  document.querySelector('.login-sso').disabled = false;
+  document.querySelector('.login-sso').textContent = 'SSO Corporativo — Ping Federate';
+}
+
+/* ── Navigation ── */
+function showPage(id, el) {
+  document.querySelectorAll('.page-wrap').forEach(function(p){ p.classList.remove('active'); });
+  var pg = document.getElementById('page-' + id);
+  if (pg) { pg.classList.add('active'); pg.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  document.querySelectorAll('.sb-item').forEach(function(i){ i.classList.remove('active'); });
+  if (el) el.classList.add('active');
+}
+
+/* ── Email thread toggle ── */
+function toggleReply(id) {
+  var body  = document.getElementById(id);
+  var arrow = document.getElementById('arrow-' + id);
+  var isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  if (arrow) arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
+</script>
+</body>
+</html>
